@@ -32,37 +32,22 @@ NOT     ["n"|N]["o"|"O"]["t"|"T"]
 /* rules */
 %%
 
-{WS}
-
-"/*" { begin_comments_line = yylineno; comments++; BEGIN(MULTI_COMMENT);}
-
+<INITIAL>"/*" { begin_comments_line = yylineno; comments++; BEGIN(MULTI_COMMENT);}
 <MULTI_COMMENT>
 {
-    <<EOF>> { std::cout << "Error on line " << begin_comments_line << ":";
-              throw std::runtime_error(" Unterminated comment '/*'");
-            }
     "*/"        { comments--; if (!comments) BEGIN(INITIAL);}
-    "/*"        comments++;
+    "/*"        { comments++; }
     [^*\n]*        /* eat anything that's not a '*' */
     "*"+[^*/\n]*   /* eat up '*'s not followed by '/'s */
     "\n"          yylineno++;
+    <<EOF>> { std::cout << "Error on line " << begin_comments_line << ":";
+              throw std::runtime_error(" Unterminated comment '/*'");
+            }
 }
 
-"*/" { std::cout << "Error on line " << yylineno << ": Unmatched '*/'\n"; }
+{WS}
 
 {SINGLE_COMMENT}.*\n
-
-{IF}        {std::cout << "KEYWORD IF" << std::endl; }
-{THEN}      {std::cout << "KEYWORD THEN" << std::endl; }
-{ELSE}      {std::cout << "KEYWORD ELSE" << std::endl; }
-{WHILE}     {std::cout << "KEYWORD WHILE" << std::endl; }
-{PRINT}     {std::cout << "PRINT" << std::endl; }
-{PRINTLN}   {std::cout << "PRINTLN" << std::endl; }
-{LOOP}      {std::cout << "KEYWORD LOOP" << std::endl; }
-{NOT}       {std::cout << "KEYWORD NOT" << std::endl; }
-"true"      {std::cout << "KEYWORD true" << std::endl; }
-"false"     {std::cout << "KEYWORD false" << std::endl; }
-"?"         {std::cout << "SCAN" << std::endl; }
 
 "("         {std::cout << "LPAREN (" << std::endl; }
 ")"         {std::cout << "RPAREN )" << std::endl; }
@@ -89,6 +74,18 @@ NOT     ["n"|N]["o"|"O"]["t"|"T"]
 "&&"        { std::cout << "LOGIC_OP AND" << std::endl; }
 "||"        { std::cout << "LOGIC_OP OR" << std::endl; }
 "!"         { std::cout << "LOGIC_OP NOT" << std::endl; }
+
+{IF}        {std::cout << "KEYWORD IF" << std::endl; }
+{THEN}      {std::cout << "KEYWORD THEN" << std::endl; }
+{ELSE}      {std::cout << "KEYWORD ELSE" << std::endl; }
+{WHILE}     {std::cout << "KEYWORD WHILE" << std::endl; }
+{PRINT}     {std::cout << "PRINT" << std::endl; }
+{PRINTLN}   {std::cout << "PRINTLN" << std::endl; }
+{LOOP}      {std::cout << "KEYWORD LOOP" << std::endl; }
+{NOT}       {std::cout << "KEYWORD NOT" << std::endl; }
+"true"      {std::cout << "KEYWORD true" << std::endl; }
+"false"     {std::cout << "KEYWORD false" << std::endl; }
+"?"         {std::cout << "SCAN" << std::endl; }
 
 {ID}        { std::cout << "ID " << yytext << std::endl; }
 
